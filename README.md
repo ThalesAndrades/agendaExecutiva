@@ -32,6 +32,15 @@ cd /home/lsi/IdeaProjects/agenda
 ./mvnw javafx:run
 ```
 
+## Executar no Windows (duplo clique)
+
+- Instale o JDK 21 (gratuito): https://adoptium.net/temurin/releases/?version=21
+- De duplo clique em `run-win.bat` (compila e abre o app).
+- Alternativa sem instalar nada: baixe o instalador `.exe` gerado pelo GitHub Actions
+  (aba **Actions** > workflow **Build Packages** > artefato `agenda-cientifica-windows-exe`),
+  que ja vem com o Java embutido.
+- Seus dados ficam em `%USERPROFILE%\.agenda-pessoal\agenda.db`.
+
 ## Executar no IntelliJ
 
 - Abra o projeto e aguarde o Maven sync.
