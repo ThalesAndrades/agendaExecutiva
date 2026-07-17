@@ -381,7 +381,15 @@ public class Database {
     private void applyAlterIfMissing(String alterSql) {
         try (Connection conn = connect(); Statement stmt = conn.createStatement()) {
             stmt.execute(alterSql);
-        } catch (SQLException ignored) { /* coluna ja existe — ignorar */ }
+        } catch (SQLException e) {
+            // Ignora apenas o caso esperado (coluna já existe). Falhas reais —
+            // banco bloqueado, corrupção, SQL inválido — devem ser propagadas
+            // para não deixar o schema silenciosamente incompleto.
+            String msg = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+            if (!msg.contains("duplicate column name")) {
+                throw new RuntimeException("Erro na migração de schema: " + alterSql, e);
+            }
+        }
     }
 }
 

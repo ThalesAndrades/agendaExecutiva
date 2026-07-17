@@ -236,21 +236,32 @@ public class InsightsController {
         }
         NaturalLanguageTaskParser parser = AppContextHolder.get().naturalLanguageTaskParser();
         NaturalLanguageTaskParser.ParsedTask p = parser.parse(text, LocalDate.now());
+
+        // Bloco de persistência isolado: só uma falha aqui significa "não capturado".
         try {
             AppContextHolder.get().taskService().createTask(
                     p.title(), "", p.date(), p.category(),
                     ScheduleType.SINGLE, null, null,
                     p.startTime(), null, p.priority(), TaskStatus.PENDENTE, null);
-            captureField.clear();
-            updatePreview();
-            ctx.triggerTasksChanged();
-            refresh();
-            ctx.setStatus("✅ Capturado: \"" + p.title() + "\" — " + DATE_FMT.format(p.date())
-                    + (p.startTime() != null ? " às " + p.startTime() : "")
-                    + " · " + p.priority().label()
-                    + (p.category() != null ? " · #" + p.category() : ""));
         } catch (Exception ex) {
             ctx.setStatus("Não foi possível capturar: " + ex.getMessage());
+            return;
+        }
+
+        // A tarefa já está persistida — o restante é pós-processamento de UI.
+        captureField.clear();
+        updatePreview();
+        String resumo = "✅ Capturado: \"" + p.title() + "\" — " + DATE_FMT.format(p.date())
+                + (p.startTime() != null ? " às " + p.startTime() : "")
+                + " · " + p.priority().label()
+                + (p.category() != null ? " · #" + p.category() : "");
+        try {
+            ctx.triggerTasksChanged();
+            refresh();
+            ctx.setStatus(resumo);
+        } catch (Exception ex) {
+            // Falha ao atualizar as abas não invalida a captura já concluída.
+            ctx.setStatus(resumo + " (atualização das abas falhou: " + ex.getMessage() + ")");
         }
     }
 

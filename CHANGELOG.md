@@ -20,7 +20,7 @@ Versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 - `tasks.completed_at`: nova coluna que registra o momento da conclusão, habilitando analytics reais de vazão e sequência (preenchida em todas as rotas de conclusão)
 - `Database(String jdbcUrl)`: construtor com URL explícita para testes de integração sobre banco temporário
 - **Primeira suíte de testes automatizados do projeto** (JUnit 5, 29 testes): parser de linguagem natural, priorizador, motor de insights e integração ponta-a-ponta com SQLite temporário; `maven-surefire-plugin` configurado
-- `SharedContext.triggerTasksChanged()`: ressincroniza todas as abas após criar/editar/concluir tarefas
+- `SharedContext.triggerTasksChanged()`: ressincroniza todas as abas após a captura inteligente; a aba Inteligência também recalcula automaticamente sempre que é aberta, garantindo dados atualizados independentemente da rota que alterou a tarefa
 - `PendencyNotificationService`: serviço background que verifica pendências a cada 5 minutos e toca `sounds/reminder.wav` (com fallback para beep)
 - Dashboard: cards "📋 Tarefas de HOJE" e "⚠️ Protocolos Vencendo" com destaque visual para apoio a TDAH
 - `SharedContext`: novos campos `todayTaskItems`, `expiringProtocolItems`, `tasksDueCountLabel`, `protocolsExpiringCountLabel`

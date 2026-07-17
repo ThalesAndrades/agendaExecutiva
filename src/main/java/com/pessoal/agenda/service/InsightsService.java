@@ -15,8 +15,12 @@ import java.util.Map;
  */
 public class InsightsService {
 
-    /** Janela de histórico considerada para métricas de conclusão/streak. */
-    private static final int HISTORY_DAYS = 90;
+    /**
+     * Janela de histórico considerada para métricas de conclusão/streak.
+     * Alinhada à trava de segurança de {@link InsightsEngine#currentStreak} (400 dias)
+     * para não truncar sequências longas.
+     */
+    private static final int HISTORY_DAYS = 400;
 
     private final TaskRepository taskRepository;
     private final InsightsEngine engine = new InsightsEngine();

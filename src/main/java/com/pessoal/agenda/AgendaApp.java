@@ -113,6 +113,7 @@ public class AgendaApp extends Application {
 
         // A aba Inteligência é adicionada por último para preservar os índices
         // usados pela navegação do Dashboard (Agenda=1, Financeiro=3).
+        var insightsTab = insightsCtrl.buildTab();
         tabPane.getTabs().addAll(
                 dashboardCtrl.buildTab(),
                 agendaCtrl.buildTab(),
@@ -122,8 +123,15 @@ public class AgendaApp extends Application {
                 studyCtrl.buildTab(),
                 ideasCtrl.buildTab(),
                 configCtrl.buildTab(),
-                insightsCtrl.buildTab()
+                insightsTab
         );
+
+        // Como nem toda rota de tarefa dispara triggerTasksChanged(), a aba
+        // Inteligência recalcula sempre que é aberta — garantindo dados frescos
+        // independentemente de onde a tarefa foi criada/editada/concluída.
+        tabPane.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            if (sel == insightsTab) insightsCtrl.refresh();
+        });
 
         // Layout principal
         BorderPane root = new BorderPane();
