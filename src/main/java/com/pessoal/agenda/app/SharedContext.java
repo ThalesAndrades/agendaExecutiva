@@ -27,6 +27,7 @@ public class SharedContext {
     private Runnable dashboardRefreshCallback;
     private Runnable alertRefreshCallback;
     private Runnable categoriesRefreshCallback;
+    private Runnable tasksChangedCallback;
 
     // ── Categorias (compartilhadas entre abas) ─────────────────────────────
     public final ObservableList<Category> taskCatList       = FXCollections.observableArrayList();
@@ -73,6 +74,15 @@ public class SharedContext {
     public void setDashboardRefreshCallback(Runnable cb)  { this.dashboardRefreshCallback  = cb; }
     public void setAlertRefreshCallback(Runnable cb)      { this.alertRefreshCallback      = cb; }
     public void setCategoriesRefreshCallback(Runnable cb) { this.categoriesRefreshCallback = cb; }
+    public void setTasksChangedCallback(Runnable cb)      { this.tasksChangedCallback      = cb; }
+
+    /**
+     * Aciona uma atualização completa após uma mudança em tarefas
+     * (criação/edição/conclusão), mantendo todas as abas em sincronia.
+     */
+    public void triggerTasksChanged() {
+        if (tasksChangedCallback != null) tasksChangedCallback.run();
+    }
 
     // ── Ações públicas ─────────────────────────────────────────────────────
 

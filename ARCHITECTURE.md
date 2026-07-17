@@ -47,11 +47,19 @@ ALTER TABLE tasks ADD COLUMN recurrence_days TEXT;
 - Criacao via `AppContextHolder.get().taskService().createTask()`
 - Conclusao via `AppContextHolder.get().taskService().markDone()`
 
+### Camada de Inteligencia (aba dedicada)
+- `NaturalLanguageTaskParser`: captura rapida em PT (data/hora/prioridade/categoria) — puro
+- `TaskPrioritizer`: score de urgencia (Eisenhower + prazo + atraso + momentum) e foco do dia — puro
+- `InsightsEngine`: metricas de vazao/streak/recomendacoes — puro
+- `InsightsService`: fachada que combina `TaskRepository` com o nucleo puro
+- Migracao `tasks.completed_at` habilita analytics reais de conclusao
+- Primeira suite de testes (JUnit 5) cobrindo parser, priorizador, engine e integracao com SQLite
+
 ## Estado atual
 - Estrutura de pacotes: model, infra, repository, service, app criados e compilando
-- `Database` centraliza conexao e migracoes
+- `Database` centraliza conexao e migracoes (com construtor testavel `Database(String jdbcUrl)`)
 - Repositorios por contexto implementados
-- `TaskService`, `AlertService` e `DashboardService` adicionados
+- `TaskService`, `AlertService`, `DashboardService` e `InsightsService` adicionados
 - `AppContext` centraliza o wiring; `Launcher` inicializa antes da UI
 - **Criacao e conclusao de tarefas migradas para `TaskService`**
 - Leitura/listagem ainda via `DatabaseService` legado (migracao pendente)

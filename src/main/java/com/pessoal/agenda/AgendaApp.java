@@ -58,6 +58,7 @@ public class AgendaApp extends Application {
     private StudyController      studyCtrl;
     private IdeasController      ideasCtrl;
     private ConfigController     configCtrl;
+    private InsightsController   insightsCtrl;
 
     // ── Barra de status ────────────────────────────────────────────────────
     private final Label statusLabel = new Label("Sistema pronto para uso.");
@@ -90,6 +91,10 @@ public class AgendaApp extends Application {
         studyCtrl     = new StudyController(ctx);
         ideasCtrl     = new IdeasController(ctx, databaseService);
         configCtrl    = new ConfigController(ctx);
+        insightsCtrl  = new InsightsController(ctx);
+
+        // Após qualquer mudança em tarefas, ressincroniza todas as abas.
+        ctx.setTasksChangedCallback(() -> refreshAllData(YearMonth.from(agendaCtrl.getCurrentDate())));
 
         // Montagem do TabPane
         TabPane tabPane = new TabPane();
@@ -101,7 +106,13 @@ public class AgendaApp extends Application {
             tabPane.getSelectionModel().select(1);
             agendaCtrl.navigateToTask(date, taskId);
         });
+        insightsCtrl.setTaskNavigator((date, taskId) -> {
+            tabPane.getSelectionModel().select(1);
+            agendaCtrl.navigateToTask(date, taskId);
+        });
 
+        // A aba Inteligência é adicionada por último para preservar os índices
+        // usados pela navegação do Dashboard (Agenda=1, Financeiro=3).
         tabPane.getTabs().addAll(
                 dashboardCtrl.buildTab(),
                 agendaCtrl.buildTab(),
@@ -110,7 +121,8 @@ public class AgendaApp extends Application {
                 salesCtrl.buildTab(),
                 studyCtrl.buildTab(),
                 ideasCtrl.buildTab(),
-                configCtrl.buildTab()
+                configCtrl.buildTab(),
+                insightsCtrl.buildTab()
         );
 
         // Layout principal
@@ -158,6 +170,7 @@ public class AgendaApp extends Application {
         salesCtrl.refresh();
         studyCtrl.refresh();
         ideasCtrl.refresh();
+        insightsCtrl.refresh();
         refreshDashboardKpis();
         refreshAlertsAndUpcoming();
         updateCriticalBadge();

@@ -286,7 +286,8 @@ public class DatabaseService {
     }
 
     public void markTaskDone(long taskId) {
-        executeUpdate("UPDATE tasks SET done = 1 WHERE id = ?", taskId);
+        executeUpdate("UPDATE tasks SET done = 1, status = 'CONCLUIDA', "
+                + "completed_at = COALESCE(completed_at, datetime('now','localtime')) WHERE id = ?", taskId);
     }
 
     public void addChecklistItem(String protocolName, String itemText) {

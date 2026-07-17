@@ -18,6 +18,14 @@ public class Database {
         this.jdbcUrl = resolveJdbcUrl();
     }
 
+    /**
+     * Construtor com URL JDBC explícita. Útil para testes de integração
+     * (ex.: um arquivo SQLite temporário) sem tocar no banco real do usuário.
+     */
+    public Database(String jdbcUrl) {
+        this.jdbcUrl = jdbcUrl;
+    }
+
     private String resolveJdbcUrl() {
         Path appDir = Path.of(System.getProperty("user.home"), ".agenda-pessoal");
         try {
@@ -314,6 +322,8 @@ public class Database {
         applyAlterIfMissing("ALTER TABLE tasks ADD COLUMN priority TEXT NOT NULL DEFAULT 'NORMAL'");
         applyAlterIfMissing("ALTER TABLE tasks ADD COLUMN status TEXT NOT NULL DEFAULT 'PENDENTE'");
         applyAlterIfMissing("ALTER TABLE tasks ADD COLUMN linked_protocol_id INTEGER");
+        // Analytics de produtividade: momento em que a tarefa foi concluída
+        applyAlterIfMissing("ALTER TABLE tasks ADD COLUMN completed_at TEXT");
         // Protocolos: validade em dias
         applyAlterIfMissing("ALTER TABLE protocols ADD COLUMN validity_days INTEGER NOT NULL DEFAULT 0");
         applyAlterIfMissing("ALTER TABLE protocols ADD COLUMN timing_mode TEXT NOT NULL DEFAULT 'NONE'");
