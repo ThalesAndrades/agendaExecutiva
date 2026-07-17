@@ -19,7 +19,7 @@ if errorlevel 1 goto :no_java
 echo Compilando e abrindo o aplicativo.
 echo (A primeira execucao baixa dependencias e pode demorar alguns minutos.)
 echo(
-call mvnw.cmd -q javafx:run
+call mvnw.cmd -q compile javafx:run
 if errorlevel 1 goto :run_error
 
 echo(
