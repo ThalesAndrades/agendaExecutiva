@@ -8,6 +8,19 @@ Versionamento segue [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ## [Não lançado]
 
 ### Adicionado
+- **🧠 Nova aba "Inteligência"** — camada analítica e de captura inteligente da agenda:
+  - `Captura inteligente`: campo em linguagem natural que interpreta automaticamente **data** (hoje, amanhã, depois de amanhã, dia da semana, `dia N`, `DD/MM`, `DD/MM/AAAA`, `em N dias`, próxima semana), **horário** (`14h`, `15:30`, `15h30`, `às 9`, meio-dia, meia-noite), **prioridade** (`!alta`, `!!`, `!!!`, `urgente`, `importante`, `quando puder`) e **categoria** (`#tag`), com pré-visualização em tempo real enquanto digita
+  - `Indicadores de produtividade`: taxa de vazão (7 dias), sequência de dias concluindo tarefas (streak), concluídas na semana/mês, abertas e atrasadas
+  - `🎯 1 tarefa principal do dia` (foco sugerido) com atalho para abrir direto na Agenda
+  - `🔝 Prioridades inteligentes`: tarefas abertas pontuadas por urgência (Eisenhower + proximidade de prazo + persistência do atraso + momentum), com duplo clique para abrir na Agenda
+  - `💡 Recomendações` acionáveis baseadas no estado atual
+- `NaturalLanguageTaskParser`: interpretador determinístico de captura rápida em português (serviço puro, sem UI/banco)
+- `TaskPrioritizer`: motor de priorização com score de urgência e sugestão de "foco do dia"
+- `InsightsEngine` (puro) + `InsightsService` (com repositório): consolidação de métricas, streak e recomendações
+- `tasks.completed_at`: nova coluna que registra o momento da conclusão, habilitando analytics reais de vazão e sequência (preenchida em todas as rotas de conclusão)
+- `Database(String jdbcUrl)`: construtor com URL explícita para testes de integração sobre banco temporário
+- **Primeira suíte de testes automatizados do projeto** (JUnit 5, 29 testes): parser de linguagem natural, priorizador, motor de insights e integração ponta-a-ponta com SQLite temporário; `maven-surefire-plugin` configurado
+- `SharedContext.triggerTasksChanged()`: ressincroniza todas as abas após a captura inteligente; a aba Inteligência também recalcula automaticamente sempre que é aberta, garantindo dados atualizados independentemente da rota que alterou a tarefa
 - `PendencyNotificationService`: serviço background que verifica pendências a cada 5 minutos e toca `sounds/reminder.wav` (com fallback para beep)
 - Dashboard: cards "📋 Tarefas de HOJE" e "⚠️ Protocolos Vencendo" com destaque visual para apoio a TDAH
 - `SharedContext`: novos campos `todayTaskItems`, `expiringProtocolItems`, `tasksDueCountLabel`, `protocolsExpiringCountLabel`

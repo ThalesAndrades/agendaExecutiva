@@ -47,7 +47,8 @@ public class TaskRepository {
     // ── UPDATE ────────────────────────────────────────────────────────────
 
     public void markDone(long id) {
-        db.execute("UPDATE tasks SET done=1, status='CONCLUIDA' WHERE id=?", id);
+        db.execute("UPDATE tasks SET done=1, status='CONCLUIDA', "
+                + "completed_at=COALESCE(completed_at, datetime('now','localtime')) WHERE id=?", id);
     }
 
     public void update(long id, String title, String notes, LocalDate dueDate, String category,
@@ -183,6 +184,35 @@ public class TaskRepository {
             + "  (schedule_type = 'SINGLE' AND due_date < date('now'))"
             + "  OR (schedule_type IN ('RANGE','WEEKLY') AND end_date < date('now'))"
             + ")");
+    }
+
+    /** Todas as tarefas (abertas e concluídas), para análises de inteligência. */
+    public List<Task> findAll() {
+        return query("SELECT * FROM tasks ORDER BY id ASC", new Object[0]);
+    }
+
+    /**
+     * Nº de tarefas concluídas por dia, considerando apenas conclusões com data
+     * registrada (coluna {@code completed_at}) a partir de {@code from}.
+     * Retorna um mapa data → contagem.
+     */
+    public Map<LocalDate, Integer> completionCountsSince(LocalDate from) {
+        Map<LocalDate, Integer> result = new LinkedHashMap<>();
+        String sql = "SELECT date(completed_at) AS d, COUNT(*) AS c FROM tasks "
+                + "WHERE completed_at IS NOT NULL AND date(completed_at) >= ? "
+                + "GROUP BY date(completed_at) ORDER BY d ASC";
+        try (Connection conn = db.connect(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, from.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String d = rs.getString("d");
+                    if (d != null) result.put(LocalDate.parse(d), rs.getInt("c"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao consultar conclusões por dia", e);
+        }
+        return result;
     }
 
     // ── helpers ───────────────────────────────────────────────────────────

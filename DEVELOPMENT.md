@@ -46,6 +46,10 @@ com.pessoal.agenda/
 │   ├── CategoryService.java
 │   ├── TaskTimerService.java       — Singleton de timer de sessão ativa
 │   ├── PendencyNotificationService.java — Alertas periódicos de pendências (TDAH)
+│   ├── NaturalLanguageTaskParser.java — Captura rápida em PT → campos estruturados (puro)
+│   ├── TaskPrioritizer.java        — Score de urgência + foco do dia (puro)
+│   ├── InsightsEngine.java         — Métricas/streak/recomendações (puro)
+│   ├── InsightsService.java        — Fachada de inteligência (usa TaskRepository)
 │   ├── GoogleAuthService.java / GoogleTasksService.java
 │   └── ...
 │
@@ -62,6 +66,7 @@ com.pessoal.agenda/
     │   ├── IdeasController.java        — Aba "Banco de Ideias"
     │   ├── SalesController.java        — Aba "Vendas"
     │   ├── ConfigController.java       — Aba "Configurações"
+    │   ├── InsightsController.java     — Aba "🧠 Inteligência" (captura + analytics)
     │   └── UIHelper.java               — Factories de componentes reutilizáveis
     ├── view/                           — Janelas secundárias (Stage independentes)
     │   ├── Dialogs.java                — Factory central de Alert/Dialog (usa Modality.NONE)
@@ -235,6 +240,56 @@ PendencyNotificationService.getInstance().stop();
   1. Atualiza alertas e KPIs
   2. Força `PendencyNotificationService.forceCheck()`
   3. Exibe status textual de lembrete manual
+
+---
+
+## Camada de Inteligência (aba 🧠)
+
+`com.pessoal.agenda.service.{NaturalLanguageTaskParser, TaskPrioritizer, InsightsEngine, InsightsService}`
++ `ui.controller.InsightsController`
+
+Arquitetura em duas partes para maximizar testabilidade:
+
+- **Núcleo puro** (sem UI/banco): `NaturalLanguageTaskParser`, `TaskPrioritizer`, `InsightsEngine`.
+  Recebem entradas explícitas (`List<Task>`, `Map<LocalDate,Integer>`, `LocalDate today`) e
+  retornam dados. São exercitados por testes unitários com uma data-base fixa.
+- **Fachada com repositório**: `InsightsService` reúne os dados persistidos (`TaskRepository.findAll()`
+  e `completionCountsSince()`) e delega o cálculo ao núcleo puro.
+
+### NaturalLanguageTaskParser
+
+`parse(String, LocalDate today)` → `ParsedTask(title, date, startTime, priority, category)`.
+Reconhece expressões de data/hora/prioridade/categoria e devolve o título já limpo dos tokens.
+
+> ⚠️ As regex usam `Pattern.UNICODE_CHARACTER_CLASS` — sem isso, `\b`/`\w` são ASCII e falham
+> em fronteiras de palavra com acento (`amanhã`, `às`, `sábado`).
+
+### Score de urgência (`TaskPrioritizer`)
+
+`score = pesoPrioridade + urgênciaPrazo + momentum(EM_ANDAMENTO)`.
+`focusOfTheDay()` prefere a tarefa de maior score que vence hoje ou está atrasada.
+
+### completed_at
+
+A migração `ALTER TABLE tasks ADD COLUMN completed_at TEXT` habilita analytics reais.
+Todas as rotas de conclusão preenchem a coluna via `COALESCE(completed_at, datetime('now','localtime'))`
+(`TaskRepository.markDone` e `DatabaseService.markTaskDone`).
+
+---
+
+## Testes
+
+`src/test/java/com/pessoal/agenda/service/` — JUnit 5 (primeira suíte do projeto).
+
+```bash
+./mvnw test
+```
+
+- Testes de lógica pura (parser, priorizador, engine) e um teste de integração ponta-a-ponta
+  (`InsightsServiceIntegrationTest`) que roda migrações reais sobre um SQLite temporário via
+  `new Database("jdbc:sqlite:" + tempFile)`.
+- `maven-surefire-plugin` roda com `useModulePath=false` (testes no classpath, evitando o
+  module-path do JPMS para o código de teste).
 
 ---
 

@@ -8,6 +8,18 @@ Aplicacao desktop para organizacao pessoal com persistencia local em SQLite.
 - Vendas pessoais e controle basico de estoque
 - Frequencia de estudos e atividades
 - Banco de ideias para projetos pessoais
+
+## Inteligencia (aba dedicada)
+- Captura inteligente: escreva em linguagem natural (ex.: `Pagar aluguel amanha as 14h #financeiro !alta`)
+  e a data, hora, prioridade e categoria sao preenchidas automaticamente
+- Indicadores de produtividade: taxa de vazao (7 dias), sequencia de dias (streak), concluidas na semana/mes
+- Foco do dia e prioridades inteligentes (score de urgencia), com atalho direto para a Agenda
+- Recomendacoes acionaveis conforme o estado atual das tarefas
+
+## Testes
+```bash
+./mvnw test
+```
 ## Banco de dados
 - Arquivo local: `~/.agenda-pessoal/agenda.db`
 - Tabelas criadas automaticamente na primeira execucao
@@ -19,6 +31,15 @@ Aplicacao desktop para organizacao pessoal com persistencia local em SQLite.
 cd /home/lsi/IdeaProjects/agenda
 ./mvnw javafx:run
 ```
+
+## Executar no Windows (duplo clique)
+
+- Instale o JDK 21 (gratuito): https://adoptium.net/temurin/releases/?version=21
+- De duplo clique em `run-win.bat` (compila e abre o app).
+- Alternativa sem instalar nada: baixe o instalador `.exe` gerado pelo GitHub Actions
+  (aba **Actions** > workflow **Build Packages** > artefato `agenda-cientifica-windows-exe`),
+  que ja vem com o Java embutido.
+- Seus dados ficam em `%USERPROFILE%\.agenda-pessoal\agenda.db`.
 
 ## Executar no IntelliJ
 

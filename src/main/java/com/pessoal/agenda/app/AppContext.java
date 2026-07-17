@@ -5,7 +5,10 @@ import com.pessoal.agenda.repository.*;
 import com.pessoal.agenda.service.AlertService;
 import com.pessoal.agenda.service.CategoryService;
 import com.pessoal.agenda.service.DashboardService;
+import com.pessoal.agenda.service.InsightsService;
+import com.pessoal.agenda.service.NaturalLanguageTaskParser;
 import com.pessoal.agenda.service.StudyAttendanceService;
+import com.pessoal.agenda.service.TaskPrioritizer;
 import com.pessoal.agenda.service.TaskService;
 
 /**
@@ -44,6 +47,9 @@ public class AppContext {
     private final DashboardService dashboardService;
     private final CategoryService categoryService;
     private final StudyAttendanceService studyAttendanceService;
+    private final InsightsService insightsService;
+    private final NaturalLanguageTaskParser naturalLanguageTaskParser;
+    private final TaskPrioritizer taskPrioritizer;
 
     private AppContext() {
         this.database = new Database();
@@ -75,6 +81,9 @@ public class AppContext {
         this.studyAttendanceService = new StudyAttendanceService(
                 studyScheduleRepository, studyEntryRepository, studyCompensationRepository,
                 studyStatusLogRepository);
+        this.insightsService = new InsightsService(taskRepository);
+        this.naturalLanguageTaskParser = new NaturalLanguageTaskParser();
+        this.taskPrioritizer = new TaskPrioritizer();
         this.categoryService.seedDefaults();
     }
 
@@ -176,5 +185,17 @@ public class AppContext {
 
     public StudyAttendanceService studyAttendanceService() {
         return studyAttendanceService;
+    }
+
+    public InsightsService insightsService() {
+        return insightsService;
+    }
+
+    public NaturalLanguageTaskParser naturalLanguageTaskParser() {
+        return naturalLanguageTaskParser;
+    }
+
+    public TaskPrioritizer taskPrioritizer() {
+        return taskPrioritizer;
     }
 }
